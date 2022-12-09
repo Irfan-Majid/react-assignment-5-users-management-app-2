@@ -1,7 +1,8 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 
 import Search from './components/Search';
 import Users from './components/Users';
+import useFetch from './hook/useFetch';
 
 const App = () => {
   // Task 2: use custom hook
@@ -10,11 +11,39 @@ const App = () => {
 
   // Task 3: delete user
   // get the id from User.js
-  const handleDeleteUser = (id) => {};
+
+  const url = 'https://jsonplaceholder.typicode.com/users';
+  const [users,setUser] = useState([]); 
+  const [filterusers,setFilteredUser] = useState(users); 
+  const {data,isLoading,error} = useFetch(url);
+  const handleDeleteUser = (id) => {
+    const datas = users.filter((user) => user.id != id );
+    setUser(datas);
+    };
+  useEffect(() => {
+    setUser(data);
+    }, [data])
+    
+  useEffect(() => {
+    setFilteredUser(users);
+    }, [users])
+
+  
 
   // Task 4: search user
   // get the text from Search.js
-  const handleSearch = (searchText) => {};
+  const handleSearch = (searchText) => {
+    if(searchText==''){
+      setFilteredUser(users)
+      return true;
+    }
+    let value = searchText.toLowerCase();
+    const newUsers = users.filter((user) => {
+      const userName = user.name.toLowerCase();
+      return userName.startsWith(value);
+    });
+    setFilteredUser(newUsers);
+  };
 
   return (
     <div className="container">
@@ -23,8 +52,8 @@ const App = () => {
       {error && <p>{error}</p>}
 
       {/* Needs to pass functions from here for state lifting  */}
-      <Search onHandleSearch={} />
-      {users.length > 1 && <Users users={usersCopy} onHandleDeleteUser={} />}
+      <Search onHandleSearch={handleSearch} />
+      {users.length && <Users users={filterusers} onHandleDeleteUser={handleDeleteUser} />}
     </div>
   );
 };
